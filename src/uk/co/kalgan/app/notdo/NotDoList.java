@@ -28,9 +28,8 @@ public class NotDoList extends Activity {
         final ArrayList<String> notDoItems = new ArrayList<String>();
         // Create the array adapter to bind the array to the listview
         final ArrayAdapter<String> aa;
-        aa = new ArrayAdapter<String>(this,
-        		android.R.layout.simple_list_item_1,
-        		notDoItems);
+        int resID = R.layout.notdolist_item;
+        aa = new ArrayAdapter<String>(this, resID, notDoItems);
         // Bind the array adapter to the listview
         myListView.setAdapter(aa);
         

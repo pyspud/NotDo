@@ -9,6 +9,7 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:text="New NotDo Item"
+		android:visibility="gone"
 	/>
 	<ListView
 		android:id="@+id/myListView"

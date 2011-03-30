@@ -16,10 +16,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 public class NotDoList extends Activity {
-	private ArrayList<String> notDoItems;
+	private ArrayList<NotDoItem> notDoItems;
 	private EditText myEditText;
 	private ListView myListView;
-	private ArrayAdapter<String> aa;
+	private ArrayAdapter<NotDoItem> aa;
 	
     /** Called when the activity is first created. */
     @Override
@@ -34,10 +34,10 @@ public class NotDoList extends Activity {
         myEditText = (EditText)findViewById(R.id.myEditText);
         
         // Create the array list of not do items
-        notDoItems = new ArrayList<String>();
+        notDoItems = new ArrayList<NotDoItem>();
         // Create the array adapter to bind the array to the listview
         int resID = R.layout.notdolist_item;
-        aa = new ArrayAdapter<String>(this, resID, notDoItems);
+        aa = new ArrayAdapter<NotDoItem>(this, resID, notDoItems);
         // Bind the array adapter to the listview
         myListView.setAdapter(aa);
         
@@ -45,7 +45,8 @@ public class NotDoList extends Activity {
         	public boolean onKey(View v, int keyCode, KeyEvent event) {
         		if (event.getAction() == KeyEvent.ACTION_DOWN)
         			if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER){
-        				notDoItems.add(0, myEditText.getText().toString());
+        				NotDoItem newItem = new NotDoItem(myEditText.getText().toString());
+        				notDoItems.add(0, newItem);
         				aa.notifyDataSetChanged();
         				myEditText.setText("");
         				cancelAdd();

@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -19,7 +18,7 @@ public class NotDoList extends Activity {
 	private ArrayList<NotDoItem> notDoItems;
 	private EditText myEditText;
 	private ListView myListView;
-	private ArrayAdapter<NotDoItem> aa;
+	private NotDoItemAdapter aa;
 	
     /** Called when the activity is first created. */
     @Override
@@ -37,7 +36,7 @@ public class NotDoList extends Activity {
         notDoItems = new ArrayList<NotDoItem>();
         // Create the array adapter to bind the array to the listview
         int resID = R.layout.notdolist_item;
-        aa = new ArrayAdapter<NotDoItem>(this, resID, notDoItems);
+        aa = new NotDoItemAdapter(this, resID, notDoItems);
         // Bind the array adapter to the listview
         myListView.setAdapter(aa);
         

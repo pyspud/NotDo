@@ -3,6 +3,7 @@ package uk.co.kalgan.app.notdo;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
@@ -19,6 +20,10 @@ public class NotDoList extends Activity {
 	private EditText myEditText;
 	private ListView myListView;
 	private NotDoItemAdapter aa;
+	
+	private static final String TEXT_ENTRY_KEY = "TEXT_ENTRY_KEY";
+	private static final String ADDING_ITEM_KEY = "ADDING_ITEM_KEY"; 
+	private static final String SELECTED_INDEX_KEY ="SELECTED_INDEX_KEY";
 	
     /** Called when the activity is first created. */
     @Override
@@ -56,6 +61,7 @@ public class NotDoList extends Activity {
         });
         
         registerForContextMenu(myListView);
+        restoreUIState();
     }
     
     static final private int ADD_NEW_NOTDO = Menu.FIRST;
@@ -149,6 +155,54 @@ public class NotDoList extends Activity {
     	return false;
     }
     
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	
+    	// Get the activity preferences object
+    	SharedPreferences uiState = getPreferences(Activity.MODE_PRIVATE);
+    	// Get preferences editor
+    	SharedPreferences.Editor editor = uiState.edit();
+    	
+    	// Add the UI state preference values
+    	editor.putString(TEXT_ENTRY_KEY, myEditText.getText().toString());
+    	editor.putBoolean(ADDING_ITEM_KEY, addingNew);
+    	
+    	editor.commit();    	
+    }
+    
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+    	savedInstanceState.putInt(SELECTED_INDEX_KEY, myListView.getSelectedItemPosition());
+    	
+    	super.onSaveInstanceState(savedInstanceState);
+    }
+    
+    public void onRestoreInstance(Bundle savedInstanceState) {
+    	int pos = -1;
+    	
+    	if (savedInstanceState != null)
+    		if (savedInstanceState.containsKey(SELECTED_INDEX_KEY))
+    			pos = savedInstanceState.getInt(SELECTED_INDEX_KEY, -1);
+    	
+    	myListView.setSelection(pos);
+    }
+    
+    private void restoreUIState() {
+    	// Get the activity preferences
+    	SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
+    	
+    	// Read the UI state values
+    	String text = settings.getString(TEXT_ENTRY_KEY, "");
+    	Boolean adding = settings.getBoolean(ADDING_ITEM_KEY, false);
+    	
+    	// Restore the UI to previous state
+    	if (adding) {
+    		addNewItem();
+    		myEditText.setText(text);
+    	}
+    }
+    
     private void cancelAdd() {
     	addingNew = false;
     	myEditText.setVisibility(View.GONE);
@@ -164,4 +218,4 @@ public class NotDoList extends Activity {
     	notDoItems.remove(_index);
     	aa.notifyDataSetChanged();
     }
-}
+} 

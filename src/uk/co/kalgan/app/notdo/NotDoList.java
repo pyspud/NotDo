@@ -1,9 +1,11 @@
 package uk.co.kalgan.app.notdo;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
@@ -20,6 +22,7 @@ public class NotDoList extends Activity {
 	private EditText myEditText;
 	private ListView myListView;
 	private NotDoItemAdapter aa;
+	private NotDoDBAdapter notDoDBAdapter;
 	
 	private static final String TEXT_ENTRY_KEY = "TEXT_ENTRY_KEY";
 	private static final String ADDING_ITEM_KEY = "ADDING_ITEM_KEY"; 
@@ -50,7 +53,8 @@ public class NotDoList extends Activity {
         		if (event.getAction() == KeyEvent.ACTION_DOWN)
         			if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER){
         				NotDoItem newItem = new NotDoItem(myEditText.getText().toString());
-        				notDoItems.add(0, newItem);
+        				notDoDBAdapter.insertTask(newItem);
+        				updateArray();
         				aa.notifyDataSetChanged();
         				myEditText.setText("");
         				cancelAdd();
@@ -62,6 +66,18 @@ public class NotDoList extends Activity {
         
         registerForContextMenu(myListView);
         restoreUIState();
+        
+        notDoDBAdapter = new NotDoDBAdapter(this);
+        notDoDBAdapter.open();
+        
+        populateNotDoList();
+    }
+    
+    @Override
+    public void onDestroy() {
+    	super.onDestroy();
+    	
+    	notDoDBAdapter.close();
     }
     
     static final private int ADD_NEW_NOTDO = Menu.FIRST;
@@ -215,7 +231,34 @@ public class NotDoList extends Activity {
     }
     
     private void removeItem(int _index) {
-    	notDoItems.remove(_index);
+    	notDoDBAdapter.removeTask(notDoItems.size()-_index);
+    	updateArray();
+    }
+    
+    Cursor notDoListCursor;
+    
+    void populateNotDoList() {
+    	// Get all the NotDo list items from the database
+    	notDoListCursor = notDoDBAdapter.getAllNotDoItemsCursor();
+    	startManagingCursor(notDoListCursor);
+    	
+    	updateArray();
+    }
+    
+    private void updateArray() {
+    	notDoListCursor.requery();
+    	
+    	notDoItems.clear();
+    	
+    	if (notDoListCursor.moveToFirst())
+    		do {
+    			String task = notDoListCursor.getString(notDoListCursor.getColumnIndex(NotDoDBAdapter.KEY_TASK));
+    			long created = notDoListCursor.getLong(notDoListCursor.getColumnIndex(NotDoDBAdapter.KEY_CREATION_DATE));
+    			
+    			NotDoItem newItem = new NotDoItem(task, new Date(created));
+    			notDoItems.add(0, newItem);
+    		} while (notDoListCursor.moveToNext());
+    	
     	aa.notifyDataSetChanged();
     }
 } 
